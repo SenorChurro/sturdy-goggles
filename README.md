@@ -1,2 +1,2 @@
 # sturdy-goggles
-Learning about game engines
+Exploration at making a game in C++
