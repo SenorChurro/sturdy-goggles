@@ -6,21 +6,37 @@ int CALLBACK WinMain(
 	LPSTR     lpCmdLine,
 	int       nCmdShow)
 {
-	Window wnd(800, 300, "Sturdy Goggles");
+	try {
+		Window wnd(800, 300, "Sturdy Goggles");
 
-	// get the messages for the window
-	MSG msg;
-	BOOL gResult;
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		// get the messages for the window
+		MSG msg;
+		BOOL gResult;
+		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (gResult == -1)
+		{
+			return -1;
+		}
+
+		return msg.wParam;
+	}
+	catch (const SGException& e)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		MessageBox(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (const std::exception& e)
+	{
+		MessageBox(nullptr, e.what(), "Standard Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (...)
+	{
+		MessageBox(nullptr, "No details Available", "Unkown Exception", MB_OK | MB_ICONEXCLAMATION);
 	}
 
-	if (gResult == -1)
-	{
-		return -1;
-	}
-
-	return msg.wParam;
+	return -1;
 }
