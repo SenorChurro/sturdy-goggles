@@ -177,7 +177,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="SGException.h" />
     <ClInclude Include="SturdyGogglesWin.h" />
     <ClInclude Include="Window.h" />
