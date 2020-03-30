@@ -119,6 +119,24 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
+	case WM_KILLFOCUS:
+		keyboard.ClearState();
+		break;
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		// filter auto repeat events by checking bit 30 of lParam
+		if (!(lParam & 0x40000000) || keyboard.AutorepeatIsEnabled())
+		{
+			keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
+		}
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
+		break;
+	case WM_CHAR:
+		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
 	}
 
 	return DefWindowProc(hWnd, msg, wParam, lParam);
