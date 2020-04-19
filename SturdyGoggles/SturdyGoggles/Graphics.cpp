@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "dxerr.h"
 #include <sstream>
+namespace wrl = Microsoft::WRL;
 // this tells our compiler to link the d3d11 library for us 
 // so that we dont have to do it in the linker 
 #pragma comment(lib,"d3d11.lib")
@@ -62,36 +63,9 @@ Graphics::Graphics(HWND hWnd)
 		&pContext
 	));
 
-	// get the back buffer
-	ID3D11Resource* pBackBuffer = nullptr;
-	//0 indicates that we want the back buffer
-	GFX_THROW_INFO(pSwap->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>( &pBackBuffer)));
-	GFX_THROW_INFO(pDevice->CreateRenderTargetView(
-		pBackBuffer,
-		nullptr,
-		&pTarget
-	));
-
-	//no longer need the buffer after rendering
-	pBackBuffer->Release();
-}
-
-Graphics::~Graphics()
-{
-	if (pTarget != nullptr) {
-		pTarget->Release();
-	}
-	if (pContext != nullptr) {
-		pContext->Release();
-	}
-
-	if (pSwap != nullptr) {
-		pSwap->Release();
-	}
-
-	if (pDevice != nullptr) {
-		pDevice->Release();
-	}
+	wrl::ComPtr<ID3D11Resource> pBackBuffer;
+	GFX_THROW_INFO(pSwap->GetBuffer(0, __uuidof(ID3D11Resource), &pBackBuffer));
+	GFX_THROW_INFO(pDevice->CreateRenderTargetView(pBackBuffer.Get(), nullptr, &pTarget));
 }
 
 void Graphics::EndFrame()
@@ -118,7 +92,7 @@ void Graphics::EndFrame()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };
-	pContext->ClearRenderTargetView(pTarget, color);
+	pContext->ClearRenderTargetView(pTarget.Get(), color);
 }
 
 
