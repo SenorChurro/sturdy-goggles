@@ -201,7 +201,11 @@
     <ResourceCompile Include="SturdyGoggles.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="goggles-black.png" />
+    <Image Include="goggles-white.png" />
     <Image Include="Icon.ico" />
+    <Image Include="ToolBoxBlack.png" />
+    <Image Include="ToolBoxLogo.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DXGetErrorDescription.inl" />

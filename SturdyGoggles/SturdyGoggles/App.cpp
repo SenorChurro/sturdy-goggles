@@ -17,11 +17,19 @@ int App::Run()
 			// if return optional has value, means we're quitting so return exit code
 			return *ecode;
 		}
-		DoFrame();
+		RenderFrame(0.1f);
 	}
 }
 
-void App::DoFrame()
+void App::SimulatePhysics(float deltaTime)
+{
+}
+
+void App::HandleInput(float deltaTime)
+{
+}
+
+void App::RenderFrame(float deltaTime)
 {
 	///example code to change the color of the background to black
 	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);

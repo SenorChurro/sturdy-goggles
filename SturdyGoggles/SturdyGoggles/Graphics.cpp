@@ -4,8 +4,8 @@
 #include <d3dcompiler.h>
 
 namespace wrl = Microsoft::WRL;
-// this tells our compiler to link the d3d11 library for us 
-// so that we dont have to do it in the linker 
+// this tells our compiler to link the d3d11 library for us
+// so that we dont have to do it in the linker
 #pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"D3DCompiler.lib");
 
@@ -94,7 +94,6 @@ void Graphics::EndFrame()
 	}
 }
 
-
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };
@@ -151,7 +150,6 @@ void Graphics::DrawTestTriangle()
 	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
 	//bind the vertex shader
 	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-	
 
 	//input layout for our vertex struct for direct x
 	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
@@ -170,14 +168,14 @@ void Graphics::DrawTestTriangle()
 	//bind the input layout
 	pContext->IASetInputLayout(pInputLayout.Get());
 
-	//bind render target 
+	//bind render target
 	//using .getaddressof so it doesnt free the resources of the pointer
 	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), nullptr);
 
-	//set the primitive topology to triangle list 
+	//set the primitive topology to triangle list
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	
-	//configure the view port 
+
+	//configure the view port
 	D3D11_VIEWPORT vp;
 	vp.Width = 800;
 	vp.Height = 600;
@@ -187,11 +185,9 @@ void Graphics::DrawTestTriangle()
 	vp.TopLeftY = 0;
 	pContext->RSSetViewports(1u, &vp);
 
-
 	//finally draw the screen
 	GFX_THROW_INFO_ONLY(pContext->Draw((UINT)std::size(vertices), 0u));
 }
-
 
 // Graphics exception stuff
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
@@ -256,7 +252,6 @@ std::string Graphics::HrException::GetErrorInfo() const noexcept
 	return info;
 }
 
-
 const char* Graphics::DeviceRemovedException::GetType() const noexcept
 {
 	return "Sturdy Goggles Graphics Exception [Device Removed] (DXGI_ERROR_DEVICE_REMOVED)";
@@ -278,7 +273,6 @@ Graphics::InfoException::InfoException(int line, const char* file, std::vector<s
 		info.pop_back();
 	}
 }
-
 
 const char* Graphics::InfoException::what() const noexcept
 {

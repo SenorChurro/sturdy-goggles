@@ -8,7 +8,9 @@ public:
 	// master frame / message loop
 	int Run();
 private:
-	void DoFrame();
+	void SimulatePhysics(float deltaTime);
+	void HandleInput(float deltaTime);
+	void RenderFrame(float deltaTime);
 private:
 	Window wnd;
 	SGTimer timer;
