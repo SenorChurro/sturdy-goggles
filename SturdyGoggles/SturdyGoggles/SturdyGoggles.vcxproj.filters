@@ -114,6 +114,9 @@
     <Image Include="ToolBoxLogo.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="goggles_black_icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="DXGetErrorDescription.inl">

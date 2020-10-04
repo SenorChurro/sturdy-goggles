@@ -203,6 +203,7 @@
   <ItemGroup>
     <Image Include="goggles-black.png" />
     <Image Include="goggles-white.png" />
+    <Image Include="goggles_black_icon.ico" />
     <Image Include="Icon.ico" />
     <Image Include="ToolBoxBlack.png" />
     <Image Include="ToolBoxLogo.png" />
