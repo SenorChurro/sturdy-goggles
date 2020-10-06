@@ -9,7 +9,6 @@
 
 class Graphics
 {
-
 public:
 	class Exception : public SGException
 	{

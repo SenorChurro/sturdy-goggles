@@ -7,7 +7,6 @@
 #include <memory>
 #include <optional>
 
-
 class Window
 {
 public:
