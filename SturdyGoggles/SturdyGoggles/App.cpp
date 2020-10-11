@@ -33,7 +33,7 @@ void App::RenderFrame(float deltaTime)
 {
 	///example code to change the color of the background to black
 	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);
-	wnd.Gfx().DrawTestTriangle();
+	wnd.Gfx().DrawTestTriangle(timer.Peek());
 	///
 	wnd.Gfx().EndFrame();
 }
