@@ -1,13 +1,27 @@
 #include "App.h"
-#include <sstream>
-#include <iomanip>
+#include "Box.h"
+#include <memory>
 
 float sceenWidth = 800;
 float screenHeight = 600;
 App::App()
 	:
 	wnd(sceenWidth, screenHeight, "SturdyGoggles")
-{}
+{
+	std::mt19937 rng(std::random_device{}());
+	std::uniform_real_distribution<float> adist(0.0f, 3.1415f * 2.0f);
+	std::uniform_real_distribution<float> ddist(0.0f, 3.1415f * 2.0f);
+	std::uniform_real_distribution<float> odist(0.0f, 3.1415f * 0.3f);
+	std::uniform_real_distribution<float> rdist(6.0f, 20.0f);
+	for (auto i = 0; i < 80; i++)
+	{
+		boxes.push_back(std::make_unique<Box>(
+			wnd.Gfx(), rng, adist,
+			ddist, odist, rdist
+			));
+	}
+	wnd.Gfx().SetProjection(DirectX::XMMatrixPerspectiveLH(1.0f, 3.0f / 4.0f, 0.5f, 40.0f));
+}
 
 int App::Run()
 {
@@ -23,6 +37,9 @@ int App::Run()
 	}
 }
 
+App::~App()
+{}
+
 void App::SimulatePhysics(float deltaTime)
 {
 }
@@ -34,22 +51,13 @@ void App::HandleInput(float deltaTime)
 void App::RenderFrame(float deltaTime)
 {
 	///example code to change the color of the background to black
-	wnd.Gfx().ClearBuffer(0.0f, 0.0f, 0.0f);
-	wnd.Gfx().DrawTestTriangle(
-		timer.Peek() * 2,
-		0.0f,
-		0.0f
-	);
-
-	wnd.Gfx().DrawTestTriangle(
-		timer.Peek(),
-		// dividing the variable by 2 so the range is 0 - 2
-		// then minus 1 so the final value is between -1 and 1
-		wnd.mouse.GetPosX() / (sceenWidth / 2) - 1.0f,
-		// normalizing the Y pos so that when the mouse moves down the screen
-		// it is read as expected by the user
-		-wnd.mouse.GetPosY() / (screenHeight / 2) + 1.0f
-	);
+	auto dt = timer.Mark();
+	wnd.Gfx().ClearBuffer(0.07f, 0.0f, 0.12f);
+	for (auto& b : boxes)
+	{
+		b->Update(dt);
+		b->Draw(wnd.Gfx());
+	}
 
 	///
 	wnd.Gfx().EndFrame();
