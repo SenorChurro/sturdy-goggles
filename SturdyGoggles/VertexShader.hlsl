@@ -7,7 +7,7 @@ struct VSOut
 cbuffer CBuff
 {
 	//later I will transpose the matrix before sending it to HLSL
-	row_major matrix transform;
+	matrix transform;
 };
 
 VSOut main(float2 pos : Position, float3 color : Color)

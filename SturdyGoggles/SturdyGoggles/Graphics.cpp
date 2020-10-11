@@ -2,8 +2,10 @@
 #include "dxerr.h"
 #include <sstream>
 #include <d3dcompiler.h>
+#include <DirectXMath.h>
 
 namespace wrl = Microsoft::WRL;
+namespace dx = DirectX;
 // this tells our compiler to link the d3d11 library for us
 // so that we dont have to do it in the linker
 #pragma comment(lib,"d3d11.lib")
@@ -102,9 +104,8 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 
 //testing out the directx api
 
-void Graphics::DrawTestTriangle(float angle)
+void Graphics::DrawTestTriangle(float angle, float x, float y)
 {
-	namespace wrl = Microsoft::WRL;
 	HRESULT hr;
 	struct  Vertex
 	{
@@ -177,16 +178,21 @@ void Graphics::DrawTestTriangle(float angle)
 
 	//create constant buffer for transformation matrices
 	struct ConstantBuffer {
-		struct {
-			float element[4][4];
-		}transformation;
+		//4 x 4 matrix provided from DirectX
+		dx::XMMATRIX transform;
 	};
+
+	//primarily we interact with the MMATRIX transform through directX functions and not directly
 	const ConstantBuffer cb = {
 		{
-			(3.0f / 4.0f) * std::cos(angle), std::sin(angle),0.0f,0.0f,
-			(3.0f / 4.0f) * -std::sin(angle), std::cos(angle),0.0f,0.0f,
-			0.0f, 0.0f,1.0f,0.0f,
-			0.0f,0.0f,0.0f,1.0f,
+			// converting the matrix from Row Major into Column major
+			// HLSL shaders expect Matrices to be column major
+			dx::XMMatrixTranspose(
+				//applying a z rotation and scaling
+				dx::XMMatrixRotationZ(angle) *
+				dx::XMMatrixScaling(3.0f / 4.0f, 1.0f,1.0f) *
+				dx::XMMatrixTranslation(x,y,0.0f)
+			)
 		}
 	};
 
