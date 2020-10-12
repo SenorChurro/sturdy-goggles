@@ -2,31 +2,16 @@
 #include "dxerr.h"
 #include <sstream>
 #include <d3dcompiler.h>
+#include <cmath>
 #include <DirectXMath.h>
+#include "GraphicsThrowMacros.h"
 
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 // this tells our compiler to link the d3d11 library for us
 // so that we dont have to do it in the linker
 #pragma comment(lib,"d3d11.lib")
-#pragma comment(lib,"D3DCompiler.lib");
-
-// graphics exception checking/throwing macros (some with dxgi infos)
-#define GFX_EXCEPT_NOINFO(hr) Graphics::HrException( __LINE__,__FILE__,(hr) )
-#define GFX_THROW_NOINFO(hrcall) if( FAILED( hr = (hrcall) ) ) throw Graphics::HrException( __LINE__,__FILE__,hr )
-
-#ifndef NDEBUG
-#define GFX_EXCEPT(hr) Graphics::HrException( __LINE__,__FILE__,(hr),infoManager.GetMessages() )
-#define GFX_THROW_INFO(hrcall) infoManager.Set(); if( FAILED( hr = (hrcall) ) ) throw GFX_EXCEPT(hr)
-#define GFX_DEVICE_REMOVED_EXCEPT(hr) Graphics::DeviceRemovedException( __LINE__,__FILE__,(hr),infoManager.GetMessages() )
-#define GFX_THROW_INFO_ONLY(call) infoManager.Set(); (call); {auto v = infoManager.GetMessages(); if(!v.empty()) {throw Graphics::InfoException( __LINE__,__FILE__,v);}}
-
-#else
-#define GFX_EXCEPT(hr) Graphics::HrException( __LINE__,__FILE__,(hr) )
-#define GFX_THROW_INFO(hrcall) GFX_THROW_NOINFO(hrcall)
-#define GFX_DEVICE_REMOVED_EXCEPT(hr) Graphics::DeviceRemovedException( __LINE__,__FILE__,(hr) )
-#define GFX_THROW_INFO_ONLY(call) (call)
-#endif
+#pragma comment(lib,"D3DCompiler.lib")
 
 Graphics::Graphics(HWND hWnd)
 {
@@ -108,6 +93,15 @@ Graphics::Graphics(HWND hWnd)
 	GFX_THROW_INFO(pDevice->CreateDepthStencilView(pDepthStencil.Get(), &descDSV, &pDSV));
 
 	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), pDSV.Get());
+	// configure viewport
+	D3D11_VIEWPORT vp;
+	vp.Width = 800.0f;
+	vp.Height = 600.0f;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0.0f;
+	vp.TopLeftY = 0.0f;
+	pContext->RSSetViewports(1u, &vp);
 }
 
 void Graphics::EndFrame()
@@ -139,197 +133,19 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 
 //testing out the directx api
 
-void Graphics::DrawTestTriangle(float angle, float x, float z)
+void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG)
 {
-	HRESULT hr;
-	struct  Vertex
-	{
-		struct
-		{
-			float x;
-			float y;
-			float z;
-		} pos;
-	};
-
-	//creating verts for the vertex buffer
-	Vertex vertices[] = {
-		{-1.0f,-1.0f,-1.0f },
-		{ 1.0f,-1.0f,-1.0f },
-		{-1.0f, 1.0f,-1.0f },
-		{ 1.0f, 1.0f,-1.0f },
-		{-1.0f,-1.0f, 1.0f },
-		{ 1.0f,-1.0f, 1.0f },
-		{-1.0f, 1.0f, 1.0f },
-		{ 1.0f, 1.0f, 1.0f },
-	};
-
-	//create vertex buffer
-	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
-
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0u;
-	bd.MiscFlags = 0u;
-	bd.ByteWidth = sizeof(vertices);
-	bd.StructureByteStride = sizeof(Vertex);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices;
-
-	GFX_THROW_INFO(pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
-
-	//bind the vertexbuffer
-	const UINT stride = sizeof(Vertex);
-	const UINT offset = 0u;
-	pContext->IASetVertexBuffers(0u, 1u, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-	// create index buffer
-	const unsigned short indices[] =
-	{
-		0,2,1, 2,3,1,
-		1,3,5, 3,7,5,
-		2,6,3, 3,6,7,
-		4,5,7, 4,7,6,
-		0,4,2, 2,4,6,
-		0,1,4, 1,5,4
-	};
-	wrl::ComPtr<ID3D11Buffer> pIndexBuffer;
-	D3D11_BUFFER_DESC ibd = {};
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.CPUAccessFlags = 0u;
-	ibd.MiscFlags = 0u;
-	ibd.ByteWidth = sizeof(indices);
-	ibd.StructureByteStride = sizeof(unsigned short);
-	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer));
-
-	//bind the index buffer
-	pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0u);
-
-	//create constant buffer for transformation matrices
-	struct ConstantBufferVertex {
-		//4 x 4 matrix provided from DirectX
-		dx::XMMATRIX transform;
-	};
-
-	//primarily we interact with the MMATRIX transform through directX functions and not directly
-	const ConstantBufferVertex cbv = {
-		{
-			// converting the matrix from Row Major into Column major
-			// HLSL shaders expect Matrices to be column major
-			dx::XMMatrixTranspose(
-				dx::XMMatrixRotationZ(angle) *
-				dx::XMMatrixRotationX(angle) *
-				dx::XMMatrixTranslation(x,0.0f,z + 4.0f) *
-				dx::XMMatrixPerspectiveLH(1.0f,3.3f / 4.0f,0.5f,10.0f)
-			)
-		}
-	};
-
-	wrl::ComPtr<ID3D11Buffer> pConstantBufferVertex;
-	D3D11_BUFFER_DESC cbvd = {};
-	cbvd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbvd.Usage = D3D11_USAGE_DYNAMIC;
-	cbvd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbvd.MiscFlags = 0u;
-	cbvd.ByteWidth = sizeof(cbv);
-	cbvd.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA csvd = {};
-	csvd.pSysMem = &cbv;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&cbvd, &csvd, &pConstantBufferVertex));
-
-	//bind the constant buffer for the vertex shader
-	pContext->VSSetConstantBuffers(0u, 1u, pConstantBufferVertex.GetAddressOf());
-
-	struct ConstantBufferPixel {
-		struct {
-			float r;
-			float g;
-			float b;
-			float a;
-		}face_colors[6];
-	};
-
-	const ConstantBufferPixel cbp = {
-		{
-			{1.0f,0.0f,1.0f},
-			{1.0f,0.0f,0.0f},
-			{0.0f,1.0f,0.0f},
-			{0.0f,0.0f,1.0f},
-			{1.0f,1.0f,0.0f},
-			{0.0f,1.0f,1.0f},
-		}
-	};
-
-	wrl::ComPtr<ID3D11Buffer> pConstantBufferPixel;
-	D3D11_BUFFER_DESC cbpd = {};
-	cbpd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbpd.Usage = D3D11_USAGE_DEFAULT;
-	cbpd.CPUAccessFlags = 0u;
-	cbpd.MiscFlags = 0u;
-	cbpd.ByteWidth = sizeof(cbp);
-	cbpd.StructureByteStride = 0u;
-	D3D11_SUBRESOURCE_DATA cspd = {};
-	cspd.pSysMem = &cbp;
-	GFX_THROW_INFO(pDevice->CreateBuffer(&cbpd, &cspd, &pConstantBufferPixel));
-
-	//bind the constant buffer for the pixel shader
-	pContext->PSSetConstantBuffers(0u, 1u, pConstantBufferPixel.GetAddressOf());
-
-	//Create the Pixel Shader
-	wrl::ComPtr<ID3D11PixelShader> pPixelShader;
-	wrl::ComPtr<ID3DBlob> pBlob;
-	//reuse the blob object
-	GFX_THROW_INFO(D3DReadFileToBlob(L"PixelShader.cso", &pBlob));
-	GFX_THROW_INFO(pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
-	//bind Pixel shader
-	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0u);
-
-	//create the vertex shader
-	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_THROW_INFO(D3DReadFileToBlob(L"VertexShader.cso", &pBlob));
-	GFX_THROW_INFO(pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader));
-	//bind the vertex shader
-	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
-
-	//input layout for our vertex struct for direct x
-	wrl::ComPtr<ID3D11InputLayout> pInputLayout;
-
-	//set up the layuouts for the shaders
-	const D3D11_INPUT_ELEMENT_DESC ied[] =
-	{
-		{"Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
-	};
-	GFX_THROW_INFO(pDevice->CreateInputLayout(
-		ied, (UINT)std::size(ied),
-		pBlob->GetBufferPointer(),
-		pBlob->GetBufferSize(),
-		&pInputLayout
-	));
-	//bind the input layout
-	pContext->IASetInputLayout(pInputLayout.Get());
-
-	//set the primitive topology to triangle list
-	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	//configure the view port
-	//think of as a rudimentary camera
-	D3D11_VIEWPORT vp;
-	vp.Width = 800;
-	vp.Height = 600;
-	vp.MinDepth = 0;
-	vp.MaxDepth = 1;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	pContext->RSSetViewports(1u, &vp);
-
-	//finally draw the screen
-	GFX_THROW_INFO_ONLY(pContext->DrawIndexed((UINT)std::size(indices), 0u, 0u));
+	GFX_THROW_INFO_ONLY(pContext->DrawIndexed(count, 0u, 0u));
 }
 
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
+{
+	projection = proj;
+}
+DirectX::XMMATRIX Graphics::GetProjection() const noexcept
+{
+	return projection;
+}
 // Graphics exception stuff
 Graphics::HrException::HrException(int line, const char* file, HRESULT hr, std::vector<std::string> infoMsgs) noexcept
 	:

@@ -71,8 +71,3 @@ private:
 	HWND hWnd;
 	std::unique_ptr<Graphics> pGfx;
 };
-
-// error exception helper macro
-#define SGWND_EXCEPT( hr ) Window::HrException( __LINE__,__FILE__,(hr) )
-#define SGWND_LAST_EXCEPT() Window::HrException( __LINE__,__FILE__,GetLastError() )
-#define SGWND_NOGFX_EXCEPT() Window::NoGfxException( __LINE__,__FILE__ )
