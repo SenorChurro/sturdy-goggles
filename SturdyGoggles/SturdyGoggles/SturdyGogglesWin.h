@@ -6,8 +6,7 @@
 
 // The following #defines are the std windows header switches
 // that we would like to have in SturdyGoggles
-
-#ifndef WIN_SWITCHES
+#ifndef FULL_WIN
 #define WIN32_LEAN_AND_MEAN
 #define NOGDICAPMASKS
 #define NOSYSMETRICS
@@ -25,6 +24,7 @@
 #define NONLS
 #define NOMEMMGR
 #define NOMETAFILE
+
 #define NOOPENFILE
 #define NOSCROLL
 #define NOSERVICE

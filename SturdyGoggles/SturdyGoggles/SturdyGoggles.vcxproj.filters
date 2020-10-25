@@ -37,6 +37,9 @@
     <Filter Include="Header Files\Geometry">
       <UniqueIdentifier>{9ed211bc-61d8-45c4-abfd-cb7d3f02c7e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Images">
+      <UniqueIdentifier>{3aec8444-65f8-4689-a4c2-47dd08234619}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">
@@ -107,6 +110,12 @@
     </ClCompile>
     <ClCompile Include="Melon.cpp">
       <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="GDIPlusManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -218,6 +227,12 @@
     <ClInclude Include="Pyramid.h">
       <Filter>Header Files\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="GDIPlusManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Surface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SturdyGoggles.rc">
@@ -242,6 +257,9 @@
     </Image>
     <Image Include="goggles_black_icon.ico">
       <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Images\emoji.png">
+      <Filter>Images</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
