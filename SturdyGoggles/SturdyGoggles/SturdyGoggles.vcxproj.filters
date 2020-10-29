@@ -43,9 +43,6 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{55ba2abf-ef9d-458b-aa5f-13070f8a7e10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui\backend">
-      <UniqueIdentifier>{6bb981f5-5b69-4031-a030-c19cf47abdab}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WinMain.cpp">

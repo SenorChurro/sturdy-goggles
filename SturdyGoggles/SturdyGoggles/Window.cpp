@@ -3,7 +3,6 @@
 #include <sstream>
 #include "resource.h"
 #include "WindowsThrowMacros.h"
-#include "imgui/imgui_impl_win32.h"
 Window::WindowClass Window::WindowClass::wndClass;
 
 Window::WindowClass::WindowClass() noexcept
