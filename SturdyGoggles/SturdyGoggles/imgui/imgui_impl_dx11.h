@@ -10,6 +10,8 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #pragma once
+#include "../SGException.h"
+#include "../Graphics.h"
 #include "imgui.h"      // IMGUI_IMPL_API
 
 struct ID3D11Device;

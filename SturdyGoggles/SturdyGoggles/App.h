@@ -1,6 +1,7 @@
 #pragma once
 #include "Window.h"
 #include "SGTimer.h"
+#include "ImguiManager.h"
 class App
 {
 public:
@@ -13,6 +14,7 @@ private:
 	void HandleInput(float deltaTime);
 	void RenderFrame(float deltaTime);
 private:
+	ImguiManager imgui;
 	Window wnd;
 	SGTimer timer;
 	std::vector<std::unique_ptr<class Drawable>> drawables;

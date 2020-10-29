@@ -12,16 +12,17 @@
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #pragma once
+#include "../SturdyGogglesWin.h"
 #include "imgui.h"      // IMGUI_IMPL_API
 
-IMGUI_IMPL_API bool     ImGui_ImplWin32_Init(void* hwnd);
+IMGUI_IMPL_API bool     ImGui_ImplWin32_Init(HWND hwnd);
 IMGUI_IMPL_API void     ImGui_ImplWin32_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplWin32_NewFrame();
-
+LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Configuration
 // - Disable gamepad support or linking with xinput.lib
-//#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
-//#define IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
+#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+#define IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
 
 // Win32 message handler your application need to call.
 // - Intentionally commented out in a '#if 0' block to avoid dragging dependencies on <windows.h> from this helper.
