@@ -1,13 +1,9 @@
 #include "App.h"
-#include "Melon.h"
-#include "Pyramid.h"
-#include "SkinnedBox.h"
 #include "Box.h"
 #include <memory>
 #include <algorithm>
 #include "SGMath.h"
 #include "Surface.h"
-#include "Sheet.h"
 #include "GDIPlusManager.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_win32.h"
@@ -16,7 +12,7 @@
 namespace dx = DirectX;
 
 GDIPlusManager gdipm;
-App::App() :wnd(800, 600, "SturdyGoggles")
+App::App() :wnd(800, 600, "SturdyGoggles"), light(wnd.Gfx())
 {
 	class Factory
 	{
@@ -27,37 +23,10 @@ App::App() :wnd(800, 600, "SturdyGoggles")
 		{}
 		std::unique_ptr<Drawable> operator()()
 		{
-			switch (typedist(rng))
-			{
-			case 0:
-				return std::make_unique<Pyramid>(
-					gfx, rng, adist, ddist,
-					odist, rdist
-					);
-			case 1:
-				return std::make_unique<Box>(
-					gfx, rng, adist, ddist,
-					odist, rdist, bdist
-					);
-			case 2:
-				return std::make_unique<Melon>(
-					gfx, rng, adist, ddist,
-					odist, rdist, longdist, latdist
-					);
-			case 3:
-				return std::make_unique<Sheet>(
-					gfx, rng, adist, ddist,
-					odist, rdist
-					);
-			case 4:
-				return std::make_unique<SkinnedBox>(
-					gfx, rng, adist, ddist,
-					odist, rdist
-					);
-			default:
-				assert(false && "bad drawable type in factory");
-				return {};
-			}
+			return std::make_unique<Box>(
+				gfx, rng, adist, ddist,
+				odist, rdist, bdist
+				);
 		}
 	private:
 		Graphics& gfx;
@@ -107,11 +76,15 @@ void App::RenderFrame(float deltaTime)
 
 	wnd.Gfx().SetCamera(cam.GetMatrix());
 
+	light.Bind(wnd.Gfx());
+
 	for (auto& d : drawables)
 	{
 		d->Update(wnd.keyboard.KeyIsPressed(VK_SPACE) ? 0.0f : dt);
 		d->Draw(wnd.Gfx());
 	}
+
+	light.Draw(wnd.Gfx());
 
 	// imgui window to control simulation speed
 	if (ImGui::Begin("Simulation Speed"))
@@ -123,7 +96,7 @@ void App::RenderFrame(float deltaTime)
 	ImGui::End();
 	// imgui window to control camera
 	cam.SpawnControlWindow();
-
+	light.SpawnControlWindow();
 	// present
 	wnd.Gfx().EndFrame();
 }

@@ -3,6 +3,7 @@
 #include "SGTimer.h"
 #include "ImguiManager.h"
 #include "Camera.h"
+#include "PointLight.h"
 
 class App
 {
@@ -21,5 +22,6 @@ private:
 	std::vector<std::unique_ptr<class Drawable>> drawables;
 	float speed_factor = 1.0f;
 	static constexpr size_t nDrawables = 180;
+	PointLight light;
 	Camera cam;
 };
